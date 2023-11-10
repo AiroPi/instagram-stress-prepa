@@ -109,13 +109,16 @@ def progress(start: dt.datetime, current: dt.datetime, end: dt.datetime):
 
 @repeat(every().day.at("07:00", "Europe/Paris"))
 def post():
+    print("Posting a new image...")
     image = make_image()
     image.save("./tmp.jpg", "JPEG")
     upload_image_to_feed(client, "./tmp.jpg", "Courage!")
+    print("Image posted!")
 
 make_image().convert("RGB").save("./tmp.jpg", "JPEG")
 
 if __name__ == "__main__":
+    print("Up!")
     while True:
         run_pending()
         time.sleep(1)
