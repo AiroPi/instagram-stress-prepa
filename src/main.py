@@ -30,9 +30,6 @@ PASSWORD = os.environ["PASSWORD"]
 BACK_TO_SCHOOL = dt.datetime(2023, 9, 4, 8, tzinfo=ZoneInfo("Europe/Paris"))
 XENS = dt.datetime(2024, 4, 15, 8, tzinfo=ZoneInfo("Europe/Paris"))
 
-mask = Image.new("L", SIZE, 0)
-progress_bar_mask = Image.new("L", SIZE, 0)
-
 if not os.path.exists(SESSION_PATH):
     client = ApiClient(username=USERNAME, password=PASSWORD)
     client.log_in()
@@ -46,17 +43,16 @@ def make_image():
     percent = progress(BACK_TO_SCHOOL, now, XENS)
     months, days = all_units(XENS - now)
 
-    background = BACKGROUND.copy()
-
+    mask = Image.new("L", SIZE, 0)
+    progress_bar_mask = Image.new("L", SIZE, 0)
     draw = ImageDraw.Draw(mask)
     draw.rectangle((0, 0, 125 + percent * 1750, 2000), 255)
-
     # set the shape of the progress bar
     progress_bar_mask.paste(mask, (0, 0), PROGRESS_BAR)
 
-    background.paste(PROGRESS_BAR, (0, 0), progress_bar_mask)
-
-    draw = ImageDraw.Draw(background)
+    result = BACKGROUND.copy()
+    result.paste(PROGRESS_BAR, mask=progress_bar_mask)
+    draw = ImageDraw.Draw(result)
 
     font = ImageFont.truetype(FONT_PATH, 100)
     draw.text(  # pyright: ignore[reportUnknownMemberType]
@@ -75,7 +71,7 @@ def make_image():
         anchor="mm",
     )
 
-    return background
+    return result
 
 
 def all_units(delta: dt.timedelta):
