@@ -111,7 +111,7 @@ def progress(start: dt.datetime, current: dt.datetime, end: dt.datetime):
 def post():
     print("Posting a new image...")
     image = make_image()
-    image.save("./tmp.jpg", "JPEG")
+    image.convert("RGB").save("./tmp.jpg", "JPEG")
     upload_image_to_feed(client, "./tmp.jpg", "Courage!")
     print("Image posted!")
 
