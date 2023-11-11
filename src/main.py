@@ -46,8 +46,9 @@ def make_image():
     mask = Image.new("L", SIZE, 0)
     progress_bar_mask = Image.new("L", SIZE, 0)
     draw = ImageDraw.Draw(mask)
+    # The progress bar is 1750px wide and centered. The mask will mask pixels on the left of the progress bar.
     draw.rectangle((0, 0, 125 + percent * 1750, 2000), 255)
-    # set the shape of the progress bar
+    # Set the shape of the progress bar, so only those pixels will be "printed" on the background.
     progress_bar_mask.paste(mask, (0, 0), PROGRESS_BAR)
 
     result = BACKGROUND.copy()
@@ -65,6 +66,7 @@ def make_image():
 
     draw.text(  # pyright: ignore[reportUnknownMemberType]
         (1000, 1500),
+        # Please, don't do that. It's just because it's new in 3.12 :)
         f"Plus que {f"{months} mois et " if months else ""}{days} jour(s)",
         font=font,
         fill=(255, 255, 255),
@@ -110,8 +112,6 @@ def post():
     image.convert("RGB").save("./tmp.jpg", "JPEG")
     upload_image_to_feed(client, "./tmp.jpg", "Courage!")
     print("Image posted!")
-
-make_image().convert("RGB").save("./tmp.jpg", "JPEG")
 
 if __name__ == "__main__":
     print("Up!")
