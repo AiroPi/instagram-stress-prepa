@@ -4,6 +4,7 @@ import time
 from zoneinfo import ZoneInfo
 
 from instauto.api.client import ApiClient
+from instauto.api.exceptions import BadResponse
 from instauto.helpers.post import upload_image_to_feed
 from PIL import Image, ImageDraw, ImageFont
 from schedule import repeat  # pyright: ignore[reportUnknownVariableType]
@@ -30,12 +31,15 @@ PASSWORD = os.environ["PASSWORD"]
 BACK_TO_SCHOOL = dt.datetime(2023, 9, 4, 8, tzinfo=ZoneInfo("Europe/Paris"))
 XENS = dt.datetime(2024, 4, 15, 8, tzinfo=ZoneInfo("Europe/Paris"))
 
-if not os.path.exists(SESSION_PATH):
-    client = ApiClient(username=USERNAME, password=PASSWORD)
-    client.log_in()
-    client.save_to_disk(SESSION_PATH)
-else:
-    client = ApiClient.initiate_from_file(SESSION_PATH)
+def get_client(force_reconnect: bool = False):
+    if force_reconnect or not os.path.exists(SESSION_PATH):
+        client = ApiClient(username=USERNAME, password=PASSWORD)
+        client.log_in()
+        client.save_to_disk(SESSION_PATH)
+    else:
+        client = ApiClient.initiate_from_file(SESSION_PATH)
+    
+    return client
 
 
 def make_image():
@@ -46,7 +50,7 @@ def make_image():
     mask = Image.new("L", SIZE, 0)
     progress_bar_mask = Image.new("L", SIZE, 0)
     draw = ImageDraw.Draw(mask)
-    # The progress bar is 1750px wide and centered. The mask will mask pixels on the left of the progress bar.
+    # The progress bar is 1750px wide and centered. The mask will mask pixels on the right of the progress bar.
     draw.rectangle((0, 0, 125 + percent * 1750, 2000), 255)
     # Set the shape of the progress bar, so only those pixels will be "printed" on the background.
     progress_bar_mask.paste(mask, (0, 0), PROGRESS_BAR)
@@ -110,8 +114,26 @@ def post():
     print("Posting a new image...")
     image = make_image()
     image.convert("RGB").save("./tmp.jpg", "JPEG")
-    upload_image_to_feed(client, "./tmp.jpg", "Courage!")
-    print("Image posted!")
+
+    def try_post(force_reconnect: bool) -> tuple[bool, str | None]:
+        try:
+            upload_image_to_feed(get_client(force_reconnect), "./tmp.jpg", "Courage!")
+        except BadResponse as e:
+            return False, str(e)
+        else:
+            return True, None
+
+    result, msg = try_post(False)
+    if result is False:
+        print("Bad response from Instagram. Trying with a reconnection...")
+        result, msg = try_post(True)
+
+    if result is False:
+        print(f"Post failed with error : {msg}")
+    else:
+        print("Image posted!")
+
+
 
 if __name__ == "__main__":
     print("Up!")
