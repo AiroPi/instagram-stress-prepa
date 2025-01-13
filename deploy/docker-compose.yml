@@ -1,13 +1,9 @@
-version: '3'
-
 services:
   instagram-bot:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    image: ghcr.io/airopi/instagram-stress-prepa
     env_file:
       - .env
     tty: true
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./data:/app/data

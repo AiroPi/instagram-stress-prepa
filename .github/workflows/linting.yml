@@ -1,0 +1,23 @@
+name: Check for style, typing, etc...
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    name: Execute tox (test, check style, lint...)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install latest version of uv
+        uses: astral-sh/setup-uv@v5
+      - name: Install tox
+        run: uv sync --only-group tox --frozen --python 3.12
+      - name: Run tox
+        run: uv run tox -e py3.12

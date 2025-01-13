@@ -1,0 +1,125 @@
+# Docs:
+# - User friendly: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+# - Technical: https://packaging.python.org/en/latest/specifications/core-metadata/#core-metadata
+# - Technical: https://packaging.python.org/en/latest/specifications/pyproject-toml/#declaring-project-metadata-the-project-table
+# - UV: https://docs.astral.sh/uv/concepts/projects/config/#configuring-projects
+#
+# Related examples:
+# - https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#a-full-example
+[project]
+name = "instagram-stress-prepa"
+version = "1.1.0"  # https://packaging.python.org/en/latest/specifications/version-specifiers/
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # https://packaging.python.org/en/latest/specifications/dependency-specifiers/
+    "pytz",
+    "Pillow",
+    "schedule",
+    "aiograpi"
+]
+
+
+[dependency-groups]
+dev = [
+    { include-group = "lint" },
+    { include-group = "tox" },
+    "pytest",
+    "debugpy",
+]
+lint = ["pyright", "ruff"]
+tox = ["tox", "tox-uv"]
+
+
+# Docs:
+# - pyright: https://microsoft.github.io/pyright/#/
+[tool.pyright]
+typeCheckingMode = "standard"
+
+
+# https://tox.wiki/en/latest/
+[tool.tox]
+envlist = ["py3.12"]
+
+[tool.tox.env_run_base]
+runner = "uv-venv-lock-runner"
+description = "run all checks on the code"
+with_dev = true
+commands = [
+    #fmt
+    ["ruff", "format", "--check", "src"],
+    ["ruff", "check", "src"],
+    ["pyright", "src"],
+]
+
+
+# https://docs.astral.sh/ruff/
+[tool.ruff]
+line-length = 120
+indent-width = 4
+target-version = "py312"
+src = ["src"]
+exclude = ["bin"]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle Error
+    "F",     # pyflakes
+    "UP",    # pyupgrade
+    "SIM",   # flake8-simplify
+    "I",     # imports
+    "S",     # bandit (security)
+    "N",     # pep8-naming
+    "ASYNC", # flake8-async
+    "C4",    # flake8-compehensions
+    "FA",    # flake8-future-annotations
+    "ISC",   # flake8-implicit-str-concat
+    "ICN",   # flake8-import-conventions
+    "G",     # flake8-logging-format
+    "PIE",   # flake8-pie
+    "PYI",   # flake8-pyi
+    "RSE",   # flake8-raise
+    "SLOT",  # flake8-slots
+    "INT",   # flake8-gettext
+    "TRY",   # tryceratops
+    "FLY",   # flynt
+    "PERF",  # Perflint
+    "FURB",  # refurb
+    "LOG",   # flake8-logging
+    "RUF",   # Ruff-specific-rules
+    # "ERA",   # locate commented codes
+    # "FIX",   # locate TODOs and FIXME
+    # "PTH",   # flake8-use-pathlib (maybe todo ?)
+    # "TID",   # flake8-tidy-imports (maybe todo ?)
+    # "SLF",   # flake8-self  (managed by pyright)
+    # "RET",   # flake8-return
+    # "Q",     # flake8-quotes
+    # "T20",   # flake8-print
+    # "DTZ",   # flake8-datetimez (TODO)
+    # "B",     # flake8-bugbear
+]
+ignore = [
+    "E501", # line too long (we relate on the formater)
+    "N818", # Error suffix for exceptions names
+    # "PIE796", # Enum contains duplicate value
+    "TRY003", # Avoid specifying long messages outsides the exception class
+    "ISC001", # To avoid conflicts with the formatter
+]
+dummy-variable-rgx = '^\*{0,2}(_$|__$|unused_|dummy_)'
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/**/*.py" = [
+    "S101", # asserts allowed in tests...
+    "ARG",  # Unused function args -> fixtures nevertheless are functionally relevant...
+    "FBT",  # Don't care about booleans as positional arguments in tests, e.g. via @pytest.mark.parametrize()
+
+    "PLR2004", # Magic value used in comparison, ...
+    "S311",    # Standard pseudo-random generators are not suitable for cryptographic purposes
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
