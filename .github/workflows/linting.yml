@@ -18,6 +18,6 @@ jobs:
       - name: Install latest version of uv
         uses: astral-sh/setup-uv@v5
       - name: Install tox
-        run: uv sync --only-group tox --frozen --python 3.13
+        run: uv sync --only-group tox --frozen --python 3.12
       - name: Run tox
         run: uv run tox -e py3.12
