@@ -1,6 +1,6 @@
 services:
   instagram-bot:
-    image: ghcr.io/airopi/instagram-stress-prepa
+    image: ghcr.io/airopi/instagram-stress-prepa:main
     env_file:
       - .env
     tty: true
