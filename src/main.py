@@ -35,7 +35,7 @@ async def get_client(force_reconnect: bool = False):
 
     await cl.login(os.environ["USERNAME"], os.environ["PASSWORD"])
 
-    cl.dump_settings(Path("session.json"))
+    cl.dump_settings(SESSION_PATH)
 
     return cl
 
