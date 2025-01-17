@@ -31,7 +31,7 @@ async def get_client(force_reconnect: bool = False):
     cl = Client()
 
     if SESSION_PATH.exists() and not force_reconnect:
-        cl.load_settings(Path("session.json"))
+        cl.load_settings(SESSION_PATH)
 
     await cl.login(os.environ["USERNAME"], os.environ["PASSWORD"])
 
